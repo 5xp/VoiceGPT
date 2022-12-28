@@ -1,10 +1,12 @@
 const { Events } = require("discord.js");
 
-module.exports = client => {
-  client.on(Events.InteractionCreate, async interaction => {
+module.exports = {
+  name: Events.InteractionCreate,
+  once: false,
+  async execute(interaction) {
     if (!interaction.isChatInputCommand()) return;
 
-    const command = client.commands.get(interaction.commandName);
+    const command = interaction.client.commands.get(interaction.commandName);
 
     if (!command) {
       console.error(`Command ${interaction.commandName} not found.`);
@@ -17,5 +19,5 @@ module.exports = client => {
       console.error(error);
       await interaction.reply({ content: "There was an error while executing this command!", ephemeral: true });
     }
-  });
+  },
 };
