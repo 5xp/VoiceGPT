@@ -4,7 +4,7 @@ const { Client, GatewayIntentBits } = require("discord.js");
 const { token } = require("./config.json");
 const loadCommands = require("./load-commands.js");
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 loadCommands(client);
 
 // Add listeners
