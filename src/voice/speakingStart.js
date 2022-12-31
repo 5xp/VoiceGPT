@@ -14,7 +14,6 @@ function deleteFiles(fileName) {
   tryDelete(fileName);
   tryDelete(`${fileName}.wav`);
   tryDelete(`${fileName}.aiff`);
-  tryDelete(`${fileName}.aiff.wav`);
 }
 
 function playSound(audioPlayer, filename) {
@@ -52,7 +51,7 @@ async function speakingStart(receiver, userId, user, gptClient, audioPlayer) {
     const ttsTime = Date.now() - ttsNow;
 
     console.log(`🤖 ${gptClient.aiName}: ${response} (query: ${queryTime}ms, tts: ${ttsTime}ms)`);
-    await playSound(audioPlayer, `${fileName}.aiff.wav`);
+    await playSound(audioPlayer, `${fileName}.aiff`);
   } catch (error) {
     console.warn(error);
   } finally {
