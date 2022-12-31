@@ -1,27 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
-const { joinVoiceChannel, entersState, VoiceConnectionStatus, createAudioPlayer } = require("@discordjs/voice");
-const speakingStart = require("../voice/speakingStart");
-const GPTClient = require("../voice/GPTClient");
-
-const player = createAudioPlayer();
-
-async function connectToChannel(channel) {
-  const connection = joinVoiceChannel({
-    channelId: channel.id,
-    guildId: channel.guild.id,
-    selfDeaf: false,
-    selfMute: false,
-    adapterCreator: channel.guild.voiceAdapterCreator,
-  });
-
-  try {
-    await entersState(connection, VoiceConnectionStatus.Ready, 20e3);
-    return connection;
-  } catch (error) {
-    connection.destroy();
-    console.warn(error);
-  }
-}
+const VoiceClient = require("../voice/VoiceClient");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -49,17 +27,9 @@ module.exports = {
     await interaction.deferReply();
 
     try {
-      const connection = await connectToChannel(voiceChannel);
+      const voiceClient = new VoiceClient(interaction.client);
+      await voiceClient.connectToChannel(voiceChannel);
       console.log("🔊 Joined voice channel.");
-
-      connection.subscribe(player);
-      const receiver = connection.receiver;
-
-      const gpt = new GPTClient();
-
-      receiver.speaking.on("start", userId => {
-        speakingStart(receiver, userId, interaction.client.users.cache.get(userId), gpt, player);
-      });
     } catch (error) {
       console.warn(error);
       return interaction.followUp("Failed to join voice channel within 20 seconds, please try again later.");
