@@ -104,10 +104,6 @@ class VoiceClient {
     });
   }
 
-  async oggToWav(fileName) {
-    return exec(`ffmpeg -i ${fileName} -acodec pcm_s16le -ac 1 -ar 16000 ${fileName}.wav`);
-  }
-
   async transcribe(fileName) {
     try {
       const { stdout } = await exec(`./bin/whisper -m ./bin/model-base.en.bin -f ${fileName} -nt`);
