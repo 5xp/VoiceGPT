@@ -84,7 +84,6 @@ class VoiceClient {
 
   deleteFiles(fileName) {
     this.tryDelete(fileName);
-    this.tryDelete(`${fileName}.wav`);
     this.tryDelete(`${fileName}.aiff`);
   }
 
@@ -111,8 +110,7 @@ class VoiceClient {
 
   async transcribe(fileName) {
     try {
-      await this.oggToWav(fileName);
-      const { stdout } = await exec(`./bin/whisper -m ./bin/model-base.en.bin -f ${fileName}.wav -nt`);
+      const { stdout } = await exec(`./bin/whisper -m ./bin/model-base.en.bin -f ${fileName} -nt`);
       return stdout.trim();
     } catch (error) {
       console.warn(error);
