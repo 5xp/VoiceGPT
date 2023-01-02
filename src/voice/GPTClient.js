@@ -1,5 +1,5 @@
 const { Configuration, OpenAIApi } = require("openai");
-const { openaiApiKey, aiName, aiPersonality } = require("../config.json");
+const { openaiApiKey, gptModel, aiName, aiPersonality } = require("../config.json");
 
 class GPTClient {
   constructor() {
@@ -9,15 +9,15 @@ class GPTClient {
     this.openaiApi = new OpenAIApi(this.configuration);
     this.aiName = aiName;
     this.personality = aiPersonality;
-    this.promptPrefix = `The following is a conversation between various people and ${this.aiName}.\n\n${this.personality}. Human text is prefixed with "$".\n`;
+    this.promptPrefix = `The following is the start of a conversation between various people and ${this.aiName}.\n\n${this.personality}\n`;
     this.apiParams = {
-      model: "text-davinci-003",
+      model: gptModel,
       max_tokens: 600,
       temperature: 1,
       top_p: 1,
-      frequency_penalty: 0.4,
-      presence_penalty: 0.4,
-      stop: ["\n$", "\n\n"],
+      frequency_penalty: 1,
+      presence_penalty: 1,
+      stop: ["{I}", "{O}"],
     };
     this.conversationHistory = "";
   }
@@ -27,7 +27,7 @@ class GPTClient {
   }
 
   constructPrompt(displayName, message) {
-    const addendum = `\n$${displayName}: ${message}\n${this.aiName}:`;
+    const addendum = `\n{I}${displayName}: ${message}\n{O}${this.aiName}:`;
     this.addToHistory(addendum);
     return this.promptPrefix + this.conversationHistory;
   }
