@@ -15,6 +15,7 @@ const GPTClient = require("./GPTClient");
 const { existsSync, mkdirSync } = require("node:fs");
 const prism = require("prism-media");
 const spawn = require("node:child_process").spawn;
+const { pathToWhisperExecutable, pathToWhisperModel } = require("../config.json");
 
 class VoiceClient {
   constructor(client) {
@@ -148,7 +149,7 @@ class VoiceClient {
 
   async transcribe(fileName) {
     try {
-      const { stdout } = await exec(`./bin/whisper -m ./bin/model-base.en.bin -f ${fileName} -nt`);
+      const { stdout } = await exec(`${pathToWhisperExecutable} -m ${pathToWhisperModel} -f ${fileName} -nt`);
       return stdout.trim();
     } catch (error) {
       console.warn(error);
