@@ -9,9 +9,12 @@ const {
   createAudioResource,
   AudioPlayerStatus,
   StreamType,
+  EndBehaviorType,
 } = require("@discordjs/voice");
-const createListeningStream = require("./createListeningStream");
 const GPTClient = require("./GPTClient");
+const { existsSync, mkdirSync } = require("node:fs");
+const prism = require("prism-media");
+const spawn = require("node:child_process").spawn;
 
 class VoiceClient {
   constructor(client) {
@@ -46,8 +49,9 @@ class VoiceClient {
   async speakingStart(userId, user) {
     const displayName = user.username;
     let fileName;
+
     try {
-      fileName = await createListeningStream(this.receiver, userId);
+      fileName = await this.createListeningStream(this.receiver, userId);
 
       const transcribeNow = Date.now();
       const transcription = await this.transcribe(fileName);
@@ -74,6 +78,44 @@ class VoiceClient {
     } finally {
       this.deleteFiles(fileName);
     }
+  }
+
+  createListeningStream(receiver, userId) {
+    const opusStream = receiver.subscribe(userId, {
+      end: {
+        behavior: EndBehaviorType.AfterSilence,
+        duration: 200,
+      },
+    });
+
+    const decoder = new prism.opus.Decoder({
+      frameSize: 960,
+      channels: 1,
+      rate: 48000,
+    });
+
+    if (!existsSync("./recordings")) {
+      mkdirSync("./recordings");
+    }
+
+    const fileName = `./recordings/${Date.now()}-${userId}.wav`;
+
+    const ffmpegCommand = `-f s16le -ar 48000 -ac 1 -i pipe:0 -f wav -ar 16000 ${fileName}`.split(" ");
+    const ffmpeg = spawn("ffmpeg", ffmpegCommand);
+
+    opusStream.pipe(decoder).pipe(ffmpeg.stdin);
+
+    return new Promise((resolve, reject) => {
+      ffmpeg.on("close", code => {
+        if (code === 0) {
+          // console.log(`✅ Recorded ${fileName}`);
+          resolve(fileName);
+        } else {
+          // console.warn(`❌ Error recording file ${fileName} - code ${code}`);
+          reject(`ffmpeg process closed with code ${code}`);
+        }
+      });
+    });
   }
 
   tryDelete(fileName) {
