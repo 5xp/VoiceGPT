@@ -131,6 +131,7 @@ dist
 
 # Config
 src/config.json
+src/secrets.json
 
 # Binaries
 bin/
