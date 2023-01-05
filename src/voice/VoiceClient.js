@@ -24,6 +24,7 @@ class VoiceClient {
     this.receiver;
     this.audioPlayer = createAudioPlayer();
     this.gpt = new GPTClient();
+    this.listening = new Set();
   }
 
   async connectToChannel(channel) {
@@ -143,8 +144,21 @@ class VoiceClient {
   listen() {
     this.receiver.speaking.on("start", userId => {
       const user = this.client.users.cache.get(userId);
+
+      if (!this.listening.has(userId)) {
+        return;
+      }
+
       this.speakingStart(userId, user);
     });
+  }
+
+  startListeningToUser(userId) {
+    this.listening.add(userId);
+  }
+
+  stopListeningToUser(userId) {
+    this.listening.delete(userId);
   }
 
   async transcribe(fileName) {
