@@ -1,11 +1,13 @@
 const fs = require("node:fs");
 const path = require("node:path");
-const { Client, GatewayIntentBits } = require("discord.js");
+const { Client, GatewayIntentBits, Collection } = require("discord.js");
 const { discordToken } = require("../secrets.json");
 const loadCommands = require("./load-commands.js");
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
 loadCommands(client);
+
+client.voiceClients = new Collection();
 
 // Add listeners
 const eventsPath = path.join(__dirname, "events");

@@ -37,10 +37,14 @@ module.exports = {
 
     await interaction.deferReply();
 
-    let voiceClient;
+    let voiceClient = interaction.client.voiceClients.get(interaction.guildId);
+
+    if (!voiceClient) {
+      voiceClient = new VoiceClient(interaction.client);
+      interaction.client.voiceClients.set(interaction.guildId, voiceClient);
+    }
 
     try {
-      voiceClient = new VoiceClient(interaction.client);
       await voiceClient.connectToChannel(voiceChannel);
       voiceClient.startListeningToUser(interaction.user.id);
     } catch (error) {
