@@ -1,7 +1,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 const { Client, GatewayIntentBits, Collection } = require("discord.js");
-const { discordToken } = require("../secrets.json");
+const { discordToken } = require("../config/secrets.json");
 const loadCommands = require("./load-commands.js");
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });

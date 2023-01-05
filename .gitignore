@@ -130,8 +130,7 @@ dist
 .pnp.*
 
 # Config
-config.json
-secrets.json
+config/
 
 # Binaries
 bin/

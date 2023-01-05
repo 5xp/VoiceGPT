@@ -1,6 +1,15 @@
 const { Configuration, OpenAIApi } = require("openai");
-const { openaiToken } = require("../../secrets.json");
-const { gptModel, aiName, aiPersonality } = require("../../config.json");
+const { openaiToken } = require("../../config/secrets.json");
+const {
+  model,
+  name,
+  personality,
+  max_tokens,
+  temperature,
+  top_p,
+  frequency_penalty,
+  presence_penalty,
+} = require("../../config/gpt-config.json");
 
 class GPTClient {
   constructor() {
@@ -8,16 +17,16 @@ class GPTClient {
       apiKey: openaiToken,
     });
     this.openaiApi = new OpenAIApi(this.configuration);
-    this.aiName = aiName;
-    this.personality = aiPersonality;
+    this.aiName = name;
+    this.personality = personality;
     this.promptPrefix = `The following is the start of a conversation between various people and ${this.aiName}.\n\n${this.personality}\n`;
     this.apiParams = {
-      model: gptModel,
-      max_tokens: 600,
-      temperature: 1,
-      top_p: 1,
-      frequency_penalty: 1,
-      presence_penalty: 1,
+      model: model,
+      max_tokens: max_tokens,
+      temperature: temperature,
+      top_p: top_p,
+      frequency_penalty: frequency_penalty,
+      presence_penalty: presence_penalty,
       stop: ["{I}", "{O}"],
     };
     this.conversationHistory = "";
