@@ -22,6 +22,7 @@ class VoiceClient {
     this.client = client;
     this.connection;
     this.receiver;
+    this.readyLock = false;
     this.audioPlayer = createAudioPlayer();
     this.gpt = new GPTClient();
     this.listening = new Set();
@@ -63,6 +64,14 @@ class VoiceClient {
         return;
       }
 
+      // Prevent multiple queries from running at the same time.
+      // Prioritize the most recent non-empty transcription.
+      if (this.readyLock === true) {
+        return;
+      }
+
+      this.readyLock = true;
+
       console.log(`🗣 ${displayName}: ${transcription} (${transcribeTime}ms)`);
 
       const queryNow = Date.now();
@@ -75,11 +84,19 @@ class VoiceClient {
 
       console.log(`🤖 ${this.gpt.aiName}: ${response} (query: ${queryTime}ms, tts: ${ttsTime}ms)`);
       await this.playSound(fileName);
+
+      // Wait for the player to finish speech before processing more queries.
+      this.unlockReadyLock();
     } catch (error) {
       console.warn(error);
     } finally {
       this.deleteFiles(fileName);
     }
+  }
+
+  async unlockReadyLock() {
+    await entersState(this.audioPlayer, AudioPlayerStatus.Idle);
+    this.readyLock = false;
   }
 
   createListeningStream(receiver, userId) {
