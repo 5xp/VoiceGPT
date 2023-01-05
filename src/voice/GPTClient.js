@@ -1,6 +1,6 @@
 const { Configuration, OpenAIApi } = require("openai");
-const { openaiToken } = require("../secrets.json");
-const { gptModel, aiName, aiPersonality } = require("../config.json");
+const { openaiToken } = require("../../secrets.json");
+const { gptModel, aiName, aiPersonality } = require("../../config.json");
 
 class GPTClient {
   constructor() {
