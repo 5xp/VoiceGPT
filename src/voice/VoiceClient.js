@@ -26,6 +26,7 @@ class VoiceClient {
     this.audioPlayer = createAudioPlayer();
     this.gpt = new GPTClient();
     this.listening = new Set();
+    this.speaking = new Set();
   }
 
   async connectToChannel(channel) {
@@ -50,11 +51,19 @@ class VoiceClient {
   }
 
   async speakingStart(userId, user) {
+    if (this.speaking.has(userId)) {
+      return;
+    }
+
+    this.speaking.add(userId);
+
     const displayName = user.username;
     let fileName;
 
     try {
       fileName = await this.createListeningStream(this.receiver, userId);
+
+      this.speaking.delete(userId);
 
       const transcribeNow = Date.now();
       const transcription = await this.transcribe(fileName);
