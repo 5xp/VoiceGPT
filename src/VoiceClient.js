@@ -65,9 +65,7 @@ class VoiceClient {
 
       this.speaking.delete(userId);
 
-      const transcribeNow = Date.now();
       const transcription = await this.transcribe(fileName);
-      const transcribeTime = Date.now() - transcribeNow;
 
       if (transcription.length === 0) {
         return;
@@ -81,17 +79,8 @@ class VoiceClient {
 
       this.readyLock = true;
 
-      console.log(`🗣 ${displayName}: ${transcription} (${transcribeTime}ms)`);
-
-      const queryNow = Date.now();
       const response = await this.gpt.query(displayName, transcription);
-      const queryTime = Date.now() - queryNow;
-
-      const ttsNow = Date.now();
       await this.textToSpeech(response, `${fileName}.aiff`);
-      const ttsTime = Date.now() - ttsNow;
-
-      console.log(`🤖 ${this.gpt.aiName}: ${response} (query: ${queryTime}ms, tts: ${ttsTime}ms)`);
       await this.playSound(fileName);
 
       // Wait for the player to finish speech before processing more queries.
