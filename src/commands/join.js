@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require("discord.js");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
-const VoiceClient = require("../voice/VoiceClient");
+const VoiceClient = require("../VoiceClient");
 
 function constructEmbed(listeningIds) {
   const embed = new EmbedBuilder().setTitle("Click the button below to toggle listening.").setColor("Blurple");

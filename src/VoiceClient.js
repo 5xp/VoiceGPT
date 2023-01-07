@@ -11,11 +11,11 @@ const {
   StreamType,
   EndBehaviorType,
 } = require("@discordjs/voice");
-const GPTClient = require("../GPTClient");
+const GPTClient = require("./GPTClient");
 const { existsSync, mkdirSync } = require("node:fs");
 const prism = require("prism-media");
 const spawn = require("node:child_process").spawn;
-const { pathToWhisperExecutable, pathToWhisperModel } = require("../../config/bot-config.json");
+const { pathToWhisperExecutable, pathToWhisperModel } = require("../config/bot-config.json");
 
 class VoiceClient {
   constructor(client) {
