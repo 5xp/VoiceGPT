@@ -40,7 +40,7 @@ class GPTClient {
 
     // Insert at the beginning of each message so GPT can pick up on this pattern
     // Then we can prevent GPT from writing on behalf of others
-    this.stopSequence = ["{I}", "{O}"];
+    this.stopSequences = [">>>"];
 
     // Approximately 1 token per 4 characters
     this.approximateTokenRatio = 1 / 4;
@@ -54,7 +54,7 @@ class GPTClient {
       top_p: this.topP,
       frequency_penalty: this.frequencyPenalty,
       presence_penalty: this.presencePenalty,
-      stop: this.stopSequence,
+      stop: this.stopSequences,
     };
   }
 
@@ -64,31 +64,16 @@ class GPTClient {
     }
   }
 
-  addResponseToHistory(content) {
-    // The last item in the history already has the "Bot:" part
-    this.conversationHistory[this.conversationHistory.length - 1] += " " + content;
-  }
-
-  getPrompt() {
+  getPrompt(addMessage) {
     let prompt = this.promptPrefix;
 
-    let sender;
-
-    // If the number of messages is odd, it has been truncated
-    if (this.conversationHistory.length % 2 === 0) {
-      sender = "I";
-    } else {
-      sender = "O";
+    for (const message of this.conversationHistory) {
+      prompt += `>>>${message}\n`;
     }
 
-    for (const message of this.conversationHistory) {
-      prompt += `{${sender}}${message}\n`;
-
-      if (sender === "O") {
-        sender = "I";
-      } else {
-        sender = "O";
-      }
+    if (addMessage) {
+      prompt += `>>>${addMessage}\n`;
+      prompt += `>>>${this.aiName}:`;
     }
 
     return prompt;
@@ -102,17 +87,13 @@ class GPTClient {
     return Math.ceil(string.length * this.approximateTokenRatio);
   }
 
-  constructPrompt(displayName, message) {
-    this.addToHistory(`${displayName}: ${message}`, `${this.aiName}:`);
-    return this.getPrompt();
-  }
-
-  adjustMaxTokens(tokenCount) {
+  adjustMaxTokens(addMessage) {
+    const tokenCount = this.getApproximateTokenCount(this.getPrompt(addMessage));
     this.maxTokensPerRequest = tokenCount + this.maxCompletionTokens;
 
     // Remove the oldest messages until prompt is under max token threshold.
     while (
-      this.getApproximateTokenCount(this.getPrompt()) >
+      this.getApproximateTokenCount(this.getPrompt(addMessage)) >
       this.maxTokensBeforeTruncation - this.maxCompletionTokens
     ) {
       this.conversationHistory.shift();
@@ -120,13 +101,15 @@ class GPTClient {
   }
 
   async query(displayName, message) {
-    const prompt = this.constructPrompt(displayName, message);
+    const content = `${displayName}: ${message}`;
+    const prompt = this.getPrompt(content);
 
-    const tokenCount = this.getApproximateTokenCount(prompt);
-    this.adjustMaxTokens(tokenCount);
+    this.adjustMaxTokens(content);
 
     const completion = await this.createCompletion(prompt);
-    this.addResponseToHistory(completion);
+
+    const formattedResponse = `${this.aiName}: ${completion}`;
+    this.addToHistory(content, formattedResponse);
 
     return completion;
   }
