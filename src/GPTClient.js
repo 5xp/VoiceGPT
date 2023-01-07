@@ -46,6 +46,14 @@ class GPTClient {
     this.approximateTokenRatio = 1 / 4;
   }
 
+  getApproximateTokenCount(string) {
+    return Math.ceil(string.length * this.approximateTokenRatio);
+  }
+
+  getMaxTokens() {
+    return this.maxTokensPerRequest;
+  }
+
   getApiParams() {
     return {
       model: this.model,
@@ -56,12 +64,6 @@ class GPTClient {
       presence_penalty: this.presencePenalty,
       stop: this.stopSequences,
     };
-  }
-
-  addToHistory() {
-    for (const argument of arguments) {
-      this.conversationHistory.push(argument);
-    }
   }
 
   getPrompt(addMessage) {
@@ -79,14 +81,6 @@ class GPTClient {
     return prompt;
   }
 
-  getMaxTokens() {
-    return this.maxTokensPerRequest;
-  }
-
-  getApproximateTokenCount(string) {
-    return Math.ceil(string.length * this.approximateTokenRatio);
-  }
-
   adjustMaxTokens(addMessage) {
     const tokenCount = this.getApproximateTokenCount(this.getPrompt(addMessage));
     this.maxTokensPerRequest = tokenCount + this.maxCompletionTokens;
@@ -100,16 +94,22 @@ class GPTClient {
     }
   }
 
-  async query(displayName, message) {
-    const content = `${displayName}: ${message}`;
-    const prompt = this.getPrompt(content);
+  addToHistory() {
+    for (const argument of arguments) {
+      this.conversationHistory.push(argument);
+    }
+  }
 
-    this.adjustMaxTokens(content);
+  async query(displayName, message) {
+    const formattedMessage = `${displayName}: ${message}`;
+    const prompt = this.getPrompt(formattedMessage);
+
+    this.adjustMaxTokens(formattedMessage);
 
     const completion = await this.createCompletion(prompt);
 
     const formattedResponse = `${this.aiName}: ${completion}`;
-    this.addToHistory(content, formattedResponse);
+    this.addToHistory(formattedMessage, formattedResponse);
 
     return completion;
   }
