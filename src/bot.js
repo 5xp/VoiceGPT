@@ -4,10 +4,18 @@ const { Client, GatewayIntentBits, Collection } = require("discord.js");
 const { discordToken } = require("../config/secrets.json");
 const loadCommands = require("./load-commands.js");
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates] });
+const client = new Client({
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.MessageContent,
+  ],
+});
 loadCommands(client);
 
 client.voiceClients = new Collection();
+client.chatClients = new Collection();
 
 // Add listeners
 const eventsPath = path.join(__dirname, "events");
