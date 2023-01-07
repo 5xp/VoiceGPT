@@ -73,7 +73,7 @@ class VoiceClient {
 
       // Prevent multiple queries from running at the same time.
       // Prioritize the most recent non-empty transcription.
-      if (this.readyLock === true) {
+      if (this.readyLock) {
         return;
       }
 

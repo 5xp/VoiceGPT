@@ -36,7 +36,7 @@ module.exports = {
       return interaction.reply({ content: "Couldn't join thread!", ephemeral: true });
     }
 
-    const collectorFilter = message => message.author.bot === false;
+    const collectorFilter = message => !message.author.bot;
     const messageCollector = await thread.createMessageCollector({
       filter: collectorFilter,
     });
