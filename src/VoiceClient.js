@@ -81,7 +81,7 @@ class VoiceClient {
 
       const response = await this.gpt.query(displayName, transcription);
       await this.textToSpeech(response, `${fileName}.aiff`);
-      await this.playSound(fileName);
+      await this.playSoundFromFile(`${fileName}.aiff`);
 
       // Wait for the player to finish speech before processing more queries.
       this.unlockReadyLock();
@@ -146,8 +146,8 @@ class VoiceClient {
     this.tryDelete(`${fileName}.aiff`);
   }
 
-  async playSound(fileName) {
-    const resource = createAudioResource(`${fileName}.aiff`, {
+  async playSoundFromFile(fileName) {
+    const resource = createAudioResource(fileName, {
       inputType: StreamType.Arbitrary,
     });
 
