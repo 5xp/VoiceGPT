@@ -79,6 +79,7 @@ function createListeningStream(receiver, userId) {
 class VoiceClient {
   connection;
   receiver;
+  channelId;
   readyLock = false;
   audioPlayer = createAudioPlayer();
   gpt = new GPTClient();
@@ -99,6 +100,8 @@ class VoiceClient {
       selfMute: false,
       adapterCreator: channel.guild.voiceAdapterCreator,
     });
+
+    this.channelId = channel.id;
 
     try {
       await entersState(this.connection, VoiceConnectionStatus.Ready, 20e3);
