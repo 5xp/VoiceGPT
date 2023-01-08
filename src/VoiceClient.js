@@ -29,10 +29,7 @@ class VoiceClient {
     this.usingSiriTTS = useSiriTTS || false;
     this.listening = new Set();
     this.speaking = new Set();
-
-    if (!this.usingSiriTTS) {
-      this.tiktok = new TikTokTTS();
-    }
+    this.tiktokVoice = "en_us_002";
   }
 
   async connectToChannel(channel) {
@@ -91,7 +88,7 @@ class VoiceClient {
         await this.textToSpeech(response, `${fileName}.aiff`);
         await this.playSoundFromFile(`${fileName}.aiff`);
       } else {
-        await this.tiktok.getTTS(response, `${fileName}.mp3`);
+        await TikTokTTS.getTTS(this.tiktokVoice, response, `${fileName}.mp3`);
         await this.playSoundFromFile(`${fileName}.mp3`);
       }
 
@@ -205,6 +202,14 @@ class VoiceClient {
     } catch (error) {
       console.warn(error);
     }
+  }
+
+  async setVoice(voice) {
+    if (!TikTokTTS.voices.includes(voice)) {
+      throw new Error("Voice not aviailable.");
+    }
+
+    this.tiktokVoice = voice;
   }
 }
 

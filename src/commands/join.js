@@ -60,17 +60,24 @@ module.exports = {
       return interaction.followUp("Failed to join voice channel within 20 seconds, please try again later.");
     }
 
-    const voiceValue = interaction.options.getString("voice");
-
-    if (voiceValue) {
-      voiceClient.tiktok.setVoice(voiceValue);
-    }
-
     await interaction.editReply({
       content: bold(`✅ Joined ${channelMention(voiceChannel.id)}`),
       embeds: [constructEmbed(voiceClient.listening)],
       components: constructComponents(),
     });
+
+    const voiceValue = interaction.options.getString("voice");
+
+    if (voiceValue) {
+      if (voiceClient.usingSiriTTS) {
+        interaction.followUp({
+          content: "Voices are not supported when using Siri TTS!",
+          ephemeral: true,
+        });
+      } else {
+        voiceClient.setVoice(voiceValue);
+      }
+    }
 
     const collectorFilter = i => i.customId === "record";
     const collector = interaction.channel.createMessageComponentCollector({ filter: collectorFilter });

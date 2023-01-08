@@ -31,7 +31,7 @@ module.exports = {
       });
     }
 
-    voiceClient.tiktok.setVoice(voiceValue);
+    voiceClient.setVoice(voiceValue);
 
     const voiceName = TikTokTTS.getVoiceNameFromValue(voiceValue);
     interaction.reply(bold(`✅ Changed voice to ${inlineCode(voiceName)}`));
