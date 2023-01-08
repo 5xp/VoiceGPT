@@ -1,0 +1,11 @@
+{
+  "model": "text-davinci-003",
+  "name": "Assistant",
+  "personality": "The assistant is helpful, creative, clever, and very friendly.",
+  "max_tokens_before_truncation": 2048,
+  "max_completion_tokens": 256,
+  "temperature": 1,
+  "top_p": 1,
+  "frequency_penalty": 1,
+  "presence_penalty": 1
+}

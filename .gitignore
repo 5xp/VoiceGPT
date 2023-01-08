@@ -130,7 +130,10 @@ dist
 .pnp.*
 
 # Config
-config/
+config/*
+
+# Unignore example files
+!config/*.example.json
 
 # Binaries
 bin/

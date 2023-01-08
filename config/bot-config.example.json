@@ -1,0 +1,7 @@
+{
+  "clientId": "bot-client-id-here",
+  "guildId": "guild-id-for-testing",
+  "pathToWhisperExecutable": "./bin/whisper",
+  "pathToWhisperModel": "./bin/model-base.en.bin",
+  "useSiriTTS": false
+}
