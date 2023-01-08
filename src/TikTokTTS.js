@@ -133,19 +133,67 @@ function postRequest(voice, text) {
   });
 }
 
+function splitString(inputString, maxLength) {
+  const chunks = [];
+
+  const sentences = inputString.split(". ");
+
+  let currentChunk = "";
+
+  // Split string into sentences, where each sentence is less than maxLength
+  for (const sentence of sentences) {
+    if (currentChunk.length + sentence.length <= maxLength) {
+      currentChunk += sentence + ". ";
+    } else {
+      chunks.push(currentChunk.trim());
+      currentChunk = sentence + ". ";
+    }
+  }
+
+  chunks.push(currentChunk.trim());
+
+  // Fall back to splitting by words if the last chunk is still too long
+  if (chunks[chunks.length - 1].length > maxLength) {
+    const lastChunkWords = chunks[chunks.length - 1].split(" ");
+
+    currentChunk = "";
+
+    for (const word of lastChunkWords) {
+      if (currentChunk.length + word.length <= maxLength) {
+        currentChunk += word + " ";
+      } else {
+        chunks[chunks.length - 1] = currentChunk.trim();
+        currentChunk = word + " ";
+        chunks.push(currentChunk.trim());
+      }
+    }
+  }
+
+  return chunks;
+}
+
 async function getTTS(voice, text, fileName) {
   if (!voices.includes(voice)) {
     throw new Error("Voice not available.");
   }
 
-  const response = await postRequest(voice, text);
-  const json = await response.json();
+  let base64 = "";
 
-  if (json.status_code !== 0) {
-    throw new Error(json.message);
+  // TikTok's API only allows 200 characters per TTS request
+  const textChunks = splitString(text, 200);
+
+  for (const chunk of textChunks) {
+    const response = await postRequest(voice, chunk);
+    const json = await response.json();
+
+    if (json.status_code !== 0) {
+      throw new Error(json.message);
+    }
+
+    base64 += json.data.v_str;
   }
 
-  base64ToFile(json.data.v_str, fileName);
+  base64ToFile(base64, fileName);
 }
 
 module.exports = {
