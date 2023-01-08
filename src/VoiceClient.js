@@ -1,6 +1,7 @@
 const util = require("node:util");
 const exec = util.promisify(require("node:child_process").exec);
 const { existsSync, mkdirSync, unlink } = require("node:fs");
+const path = require("node:path");
 const spawn = require("node:child_process").spawn;
 const {
   createAudioPlayer,
@@ -25,7 +26,9 @@ function tryDelete(fileName) {
 
 async function transcribe(fileName) {
   try {
-    const { stdout } = await exec(`${pathToWhisperExecutable} -m ${pathToWhisperModel} -f ${fileName} -nt`);
+    const { stdout } = await exec(
+      `${path.resolve(pathToWhisperExecutable)} -m ${path.resolve(pathToWhisperModel)} -f ${fileName} -nt`,
+    );
     return stdout.trim();
   } catch (error) {
     console.warn(error);
@@ -34,7 +37,7 @@ async function transcribe(fileName) {
 
 async function getSiriTTS(message, fileName) {
   try {
-    await exec(`say "${message}" -o ${fileName}`);
+    await exec(`say "${message}" -o ${path.resolve(fileName)}`);
   } catch (error) {
     console.warn(error);
   }
