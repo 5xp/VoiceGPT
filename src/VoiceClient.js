@@ -12,10 +12,11 @@ const {
   EndBehaviorType,
 } = require("@discordjs/voice");
 const GPTClient = require("./GPTClient");
+const TikTokTTS = require("./TikTokTTS");
 const { existsSync, mkdirSync } = require("node:fs");
 const prism = require("prism-media");
 const spawn = require("node:child_process").spawn;
-const { pathToWhisperExecutable, pathToWhisperModel } = require("../config/bot-config.json");
+const { pathToWhisperExecutable, pathToWhisperModel, useSiriTTS } = require("../config/bot-config.json");
 
 class VoiceClient {
   constructor(client) {
@@ -25,8 +26,13 @@ class VoiceClient {
     this.readyLock = false;
     this.audioPlayer = createAudioPlayer();
     this.gpt = new GPTClient();
+    this.usingSiriTTS = useSiriTTS || false;
     this.listening = new Set();
     this.speaking = new Set();
+
+    if (!this.usingSiriTTS) {
+      this.tiktok = new TikTokTTS();
+    }
   }
 
   async connectToChannel(channel) {
@@ -80,8 +86,14 @@ class VoiceClient {
       this.readyLock = true;
 
       const response = await this.gpt.query(displayName, transcription);
-      await this.textToSpeech(response, `${fileName}.aiff`);
-      await this.playSoundFromFile(`${fileName}.aiff`);
+
+      if (this.usingSiriTTS) {
+        await this.textToSpeech(response, `${fileName}.aiff`);
+        await this.playSoundFromFile(`${fileName}.aiff`);
+      } else {
+        await this.tiktok.getTTS(response, `${fileName}.mp3`);
+        await this.playSoundFromFile(`${fileName}.mp3`);
+      }
 
       // Wait for the player to finish speech before processing more queries.
       this.unlockReadyLock();
@@ -143,7 +155,9 @@ class VoiceClient {
 
   deleteFiles(fileName) {
     this.tryDelete(fileName);
-    this.tryDelete(`${fileName}.aiff`);
+
+    const ttsExtension = this.usingSiriTTS ? "aiff" : "mp3";
+    this.tryDelete(`${fileName}.${ttsExtension}`);
   }
 
   async playSoundFromFile(fileName) {

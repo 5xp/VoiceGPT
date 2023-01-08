@@ -1,6 +1,7 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, bold, channelMention } = require("discord.js");
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
 const VoiceClient = require("../VoiceClient");
+const TikTokTTS = require("../TikTokTTS");
 
 function constructEmbed(listeningIds) {
   const embed = new EmbedBuilder().setTitle("Click the button below to toggle listening.").setColor("Blurple");
@@ -27,7 +28,14 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("join")
     .setDescription("Joins the voice channel you are in.")
-    .setDMPermission(false),
+    .setDMPermission(false)
+    .addStringOption(option =>
+      option
+        .setName("voice")
+        .setDescription("The voice to use.")
+        .setRequired(false)
+        .addChoices(...TikTokTTS.voiceStringOptionChoices),
+    ),
   async execute(interaction) {
     const voiceChannel = interaction.member.voice.channel;
 
@@ -52,8 +60,14 @@ module.exports = {
       return interaction.followUp("Failed to join voice channel within 20 seconds, please try again later.");
     }
 
+    const voiceValue = interaction.options.getString("voice");
+
+    if (voiceValue) {
+      voiceClient.tiktok.setVoice(voiceValue);
+    }
+
     await interaction.editReply({
-      content: `**✅ Joined <#${voiceChannel.id}>**`,
+      content: bold(`✅ Joined ${channelMention(voiceChannel.id)}`),
       embeds: [constructEmbed(voiceClient.listening)],
       components: constructComponents(),
     });
