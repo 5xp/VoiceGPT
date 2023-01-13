@@ -15,15 +15,20 @@ module.exports = {
       return;
     }
 
+    const clientMember = message.guild.members.resolve(message.client.user);
+
+    const regex = new RegExp(`@${clientMember.displayName}\\s?`, "g");
+    const content = message.cleanContent.replace(regex, "").trim();
+
     const gpt = new GPTClient();
 
-    const response = await gpt.query(message.cleanContent);
+    const response = await gpt.query(content);
 
     const escaped = escapeMarkdown(response, {
       codeBlock: false,
       inlineCode: false,
     });
 
-    message.reply(escaped);
+    message.reply({ content: escaped, allowedMentions: { repliedUser: false } });
   },
 };
