@@ -107,10 +107,14 @@ function getVoiceNameFromValue(value) {
 function base64ToFile(base64, fileName) {
   const buffer = Buffer.from(base64, "base64");
 
-  writeFile(fileName, buffer, err => {
-    if (err) {
-      console.error(err);
-    }
+  return new Promise((resolve, reject) => {
+    writeFile(fileName, buffer, err => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
   });
 }
 
