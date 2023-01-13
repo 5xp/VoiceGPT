@@ -176,9 +176,9 @@ function splitString(inputString, maxLength) {
   return chunks;
 }
 
-async function getTTS(voice, text, fileName) {
+async function getTTSBase64(voice, text) {
   if (!voices.includes(voice)) {
-    throw new Error("Voice not available.");
+    throw new Error(`Invalid voice: ${voice}`);
   }
 
   let base64 = "";
@@ -197,7 +197,12 @@ async function getTTS(voice, text, fileName) {
     base64 += json.data.v_str;
   }
 
-  base64ToFile(base64, fileName);
+  return base64;
+}
+
+async function getTTS(voice, text, fileName) {
+  const base64 = await getTTSBase64(voice, text);
+  return base64ToFile(base64, fileName);
 }
 
 module.exports = {
@@ -206,4 +211,5 @@ module.exports = {
   voiceStringOptionChoices,
   getVoiceNameFromValue,
   getTTS,
+  getTTSBase64,
 };
