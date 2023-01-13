@@ -13,38 +13,36 @@ const {
 } = require("../config/gpt-config.json");
 
 class GPTClient {
-  constructor() {
-    this.configuration = new Configuration({
-      apiKey: openaiToken,
-    });
-    this.openaiApi = new OpenAIApi(this.configuration);
-    this.model = model;
-    this.aiName = name;
-    this.personality = personality;
-    this.temperature = temperature;
-    this.topP = top_p;
-    this.frequencyPenalty = frequency_penalty;
-    this.presencePenalty = presence_penalty;
-    this.promptPrefix = `The following is the start of a conversation between various people and ${this.aiName}.\n\n${this.personality}\n\n`;
-    this.conversationHistory = [];
+  configuration = new Configuration({
+    apiKey: openaiToken,
+  });
+  openaiApi = new OpenAIApi(this.configuration);
+  model = model;
+  aiName = name;
+  personality = personality;
+  temperature = temperature;
+  topP = top_p;
+  frequencyPenalty = frequency_penalty;
+  presencePenalty = presence_penalty;
+  promptPrefix = `The following is the start of a conversation between various people and ${this.aiName}.\n\n${this.personality}\n\n`;
+  conversationHistory = [];
 
-    // The hard limit of number of tokens before we start truncating conversation history
-    this.maxTokensBeforeTruncation = max_tokens_before_truncation;
+  // The hard limit of number of tokens before we start truncating conversation history
+  maxTokensBeforeTruncation = max_tokens_before_truncation;
 
-    // The max number of tokens reserved for completion
-    this.maxCompletionTokens = max_completion_tokens;
+  // The max number of tokens reserved for completion
+  maxCompletionTokens = max_completion_tokens;
 
-    // The entire number of tokens per request (prompt + completion)
-    // Always the previous prompt token count + reserved completion tokens
-    this.maxTokensPerRequest;
+  // The entire number of tokens per request (prompt + completion)
+  // Always the previous prompt token count + reserved completion tokens
+  maxTokensPerRequest;
 
-    // Insert at the beginning of each message so GPT can pick up on this pattern
-    // Then we can prevent GPT from writing on behalf of others
-    this.stopSequences = [">>>"];
+  // Insert at the beginning of each message so GPT can pick up on this pattern
+  // Then we can prevent GPT from writing on behalf of others
+  stopSequences = [">>>"];
 
-    // Approximately 1 token per 4 characters
-    this.approximateTokenRatio = 1 / 4;
-  }
+  // Approximately 1 token per 4 characters
+  approximateTokenRatio = 1 / 4;
 
   getApproximateTokenCount(string) {
     return Math.ceil(string.length * this.approximateTokenRatio);
